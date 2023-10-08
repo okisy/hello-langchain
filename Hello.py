@@ -7,7 +7,6 @@ from langchain.schema import (
 )
 from langchain.callbacks import get_openai_callback
 
-
 def init_page():
     st.set_page_config(
         page_title="My Great ChatGPT",
@@ -33,8 +32,8 @@ def select_model():
     else:
         model_name = "gpt-4"
 
-    # Add a slider to allow users to select the temperature from 0 to 2.
-    # The initial value should be 0.0, with an increment of 0.01.
+    # スライダーを追加し、temperatureを0から2までの範囲で選択可能にする
+    # 初期値は0.0、刻み幅は0.01とする
     temperature = st.sidebar.slider("Temperature:", min_value=0.0, max_value=2.0, value=0.0, step=0.01)
 
     return ChatOpenAI(temperature=temperature, model_name=model_name)
@@ -52,14 +51,15 @@ def main():
     llm = select_model()
     init_messages()
 
-    # Monitor user input
-    if user_input := st.chat_input("Input your question here:"):
+    # ユーザーの入力を監視
+    if user_input := st.chat_input("聞きたいことを入力してね！"):
         st.session_state.messages.append(HumanMessage(content=user_input))
         with st.spinner("ChatGPT is typing ..."):
             answer, cost = get_answer(llm, st.session_state.messages)
         st.session_state.messages.append(AIMessage(content=answer))
         st.session_state.costs.append(cost)
 
+    # 会話履歴を普通に表示する
     messages = st.session_state.get('messages', [])
     for message in messages:
         if isinstance(message, AIMessage):
@@ -71,6 +71,7 @@ def main():
         else:  # isinstance(message, SystemMessage):
             st.write(f"System message: {message.content}")
 
+    # 費用の表示
     costs = st.session_state.get('costs', [])
     st.sidebar.markdown("## Costs")
     st.sidebar.markdown(f"**Total cost: ${sum(costs):.5f}**")
